@@ -1,0 +1,204 @@
+{
+  "schema": "co-link.local-source/1",
+  "archives": {
+    "co-Link-Standard-Setup-0.1.2-win-x64.zip": "86fc01062aa09e021273a54cc95caad6ee4a6afc5787d2956ca4618f37dfd236",
+    "co-Link-Conversion-Assistant-0.1.5-win-x64.zip": "f3e844f8a0c30948c926693da1b9cc12f0dee5473c716977141bb4b067cd58c5"
+  },
+  "native_probe_exe_sha256": "e03b5c07abceb337b8338883fcd15e3d29a1ccdba04fcc6f67c036d34f3aaa54",
+  "files": [
+    {
+      "path": "setup/install-colink.ps1",
+      "sha256": "be2b60f42e024e515c8440ebccf5534c5dfd0b2c1482e8e371ea86a131e6237d",
+      "origin": "co-Link-Standard-Setup-0.1.2-win-x64.zip",
+      "member": "install-colink.ps1"
+    },
+    {
+      "path": "setup/uninstall-colink.ps1",
+      "sha256": "134e7d3b2f458320874300754ce0402e628366fc5ec83297afd46c69b9bca0e8",
+      "origin": "co-Link-Standard-Setup-0.1.2-win-x64.zip",
+      "member": "uninstall-colink.ps1"
+    },
+    {
+      "path": "setup/Install co-Link.cmd",
+      "sha256": "893be6d3e4449c556c6cb7c70843df40d516695a4c7ab572894b1b59cc6a6c20",
+      "origin": "co-Link-Standard-Setup-0.1.2-win-x64.zip",
+      "member": "Install co-Link.cmd"
+    },
+    {
+      "path": "setup/INSTALLATION.md",
+      "sha256": "7287499329d7d393305f954505fc82f36a6378f7385370d46f10ebbb758aa6b4",
+      "origin": "co-Link-Standard-Setup-0.1.2-win-x64.zip",
+      "member": "INSTALLATION.md"
+    },
+    {
+      "path": "setup/USBIP-LICENSE.txt",
+      "sha256": "4a4d332cbf1c623639df7ffc756243d86462beb4c79c8b11081cb44a4792eda2",
+      "origin": "co-Link-Standard-Setup-0.1.2-win-x64.zip",
+      "member": "USBIP-LICENSE.txt"
+    },
+    {
+      "path": "setup/USBIP-PROVENANCE.json",
+      "sha256": "b6798585f9f0689f30f21ff750bff399f3e46885efefbcf7238f664dd40e5c64",
+      "origin": "co-Link-Standard-Setup-0.1.2-win-x64.zip",
+      "member": "USBIP-PROVENANCE.json"
+    },
+    {
+      "path": "helper/helper_server.py",
+      "sha256": "6607a2dbc6a855d8a9a4d9f997b34f1b9a46a8199ae3ab3b5724f470dec73fd9",
+      "origin": "co-Link-Conversion-Assistant-0.1.5-win-x64.zip",
+      "member": "helper_server.py"
+    },
+    {
+      "path": "helper/helper_runtime.py",
+      "sha256": "a1a4a3d22847d8c90b03401ef1e858ad892f8196092d721591ea9c22e1720e3a",
+      "origin": "co-Link-Conversion-Assistant-0.1.5-win-x64.zip",
+      "member": "helper_runtime.py"
+    },
+    {
+      "path": "helper/transport_readiness.py",
+      "sha256": "1247362ba5500b47703fabc6508ddb8a47201b84106827168c6c975cbbc8c061",
+      "origin": "co-Link-Conversion-Assistant-0.1.5-win-x64.zip",
+      "member": "transport_readiness.py"
+    },
+    {
+      "path": "helper/identity.py",
+      "sha256": "708a3b2109375060dfb051539dfff8c10056cae3608cebd7bbf0bf7cc2af3f1a",
+      "origin": "co-Link-Conversion-Assistant-0.1.5-win-x64.zip",
+      "member": "identity.py"
+    },
+    {
+      "path": "helper/inspect_adapter.py",
+      "sha256": "180039cd3f54a1ba20cd00444db06df1874153442593896be7cd13aef2c52d3f",
+      "origin": "co-Link-Conversion-Assistant-0.1.5-win-x64.zip",
+      "member": "inspect_adapter.py"
+    },
+    {
+      "path": "helper/plan.py",
+      "sha256": "681e7bcf59de2f6e6d7359c0d326e1fe2c83290f97d4570853a09e54bc5b26d2",
+      "origin": "co-Link-Conversion-Assistant-0.1.5-win-x64.zip",
+      "member": "plan.py"
+    },
+    {
+      "path": "helper/trusted_installation.py",
+      "sha256": "5be3e9fa74a7b728e05796c9d4c238f4faa60849ec58cd64ad7248f35b31435f",
+      "origin": "co-Link-Conversion-Assistant-0.1.5-win-x64.zip",
+      "member": "trusted_installation.py"
+    },
+    {
+      "path": "helper/requirements.txt",
+      "sha256": "c166a08992cae6c143bcbce47523ac4dc08ebdd26673048bbc247631abd17e53",
+      "origin": "co-Link-Conversion-Assistant-0.1.5-win-x64.zip",
+      "member": "requirements.txt"
+    },
+    {
+      "path": "helper/plan-public-keys.json",
+      "sha256": "1648f645ad2bc2b60c7779b721528b1a25b8544f32fc9dd808e172cdd44a5732",
+      "origin": "co-Link-Conversion-Assistant-0.1.5-win-x64.zip",
+      "member": "plan-public-keys.json"
+    },
+    {
+      "path": "helper/SOURCE-PROVENANCE.json",
+      "sha256": "4dcb37516d19d592def8ec9d1f1ae89a1643a35387ef02d110d9d0d8444a97ea",
+      "origin": "co-Link-Conversion-Assistant-0.1.5-win-x64.zip",
+      "member": "SOURCE-PROVENANCE.json"
+    },
+    {
+      "path": "helper/Run Assistant.cmd",
+      "sha256": "53e6298beb4cf40dc60def7af23a5d150bd83e9fbd51d1fda932dc712b72497d",
+      "origin": "co-Link-Conversion-Assistant-0.1.5-win-x64.zip",
+      "member": "Run Assistant.cmd"
+    },
+    {
+      "path": "helper/Start Assistant.cmd",
+      "sha256": "501e180afc569205480fb8ae7a9785186f83bc0f2b24e77dc44cee73aa67dcc0",
+      "origin": "co-Link-Conversion-Assistant-0.1.5-win-x64.zip",
+      "member": "Start Assistant.cmd"
+    },
+    {
+      "path": "helper/Install Assistant.cmd",
+      "sha256": "fb9b2f8091f2ff361a0bb55e6665f99ea8e61188c6cd46caebf5c65a6322bb17",
+      "origin": "co-Link-Conversion-Assistant-0.1.5-win-x64.zip",
+      "member": "Install Assistant.cmd"
+    },
+    {
+      "path": "helper/native/manage-transmitter.ps1",
+      "sha256": "a765b042e195ec99b7f4e232d6fdb73268a5e6081120da0719440581c7659186",
+      "origin": "co-Link-Conversion-Assistant-0.1.5-win-x64.zip",
+      "member": "native/manage-transmitter.ps1"
+    },
+    {
+      "path": "helper/native/elevate-helper.ps1",
+      "sha256": "76367ab7d169b81758ddd16cdd6d795eca15a2e8adcf3d73c45adbf7bdd2c76c",
+      "origin": "co-Link-Conversion-Assistant-0.1.5-win-x64.zip",
+      "member": "native/elevate-helper.ps1"
+    },
+    {
+      "path": "helper/native/install-assistant.ps1",
+      "sha256": "26a119b4c27712866fb6ebb565d095752e4a8c32642f9b52c6ab74bec5f620d7",
+      "origin": "co-Link-Conversion-Assistant-0.1.5-win-x64.zip",
+      "member": "native/install-assistant.ps1"
+    },
+    {
+      "path": "helper/native/trusted-path.ps1",
+      "sha256": "75535d12aad9f41e9074717bdb650c5fdc10511156723e5a207a43f149803727",
+      "origin": "co-Link-Conversion-Assistant-0.1.5-win-x64.zip",
+      "member": "native/trusted-path.ps1"
+    },
+    {
+      "path": "helper/radio/winusb_radio_probe.py",
+      "sha256": "805356cea93ce01423abc5686617193d99d15ba62b3744abc169d81da3e17bba",
+      "origin": "co-Link-Conversion-Assistant-0.1.5-win-x64.zip",
+      "member": "radio/winusb_radio_probe.py"
+    },
+    {
+      "path": "helper/radio/usb_chipset_init.py",
+      "sha256": "4ef4fbd69287c35b1203452dc7041e1cea120879145751269dd3eadd412395af",
+      "origin": "co-Link-Conversion-Assistant-0.1.5-win-x64.zip",
+      "member": "radio/usb_chipset_init.py"
+    },
+    {
+      "path": "helper/radio/bumble_runtime.py",
+      "sha256": "bcd43471c7a9e5c00c58ebefe487eaf87a11732bb67c76def8c8bbb3f7c4433e",
+      "origin": "co-Link-Conversion-Assistant-0.1.5-win-x64.zip",
+      "member": "radio/bumble_runtime.py"
+    },
+    {
+      "path": "helper/licenses/libwdi/COPYING",
+      "sha256": "0b383d5a63da644f628d99c33976ea6487ed89aaa59f0b3257992deac1171e6b",
+      "origin": "co-Link-Conversion-Assistant-0.1.5-win-x64.zip",
+      "member": "licenses/libwdi/COPYING"
+    },
+    {
+      "path": "helper/licenses/libwdi/COPYING-LGPL",
+      "sha256": "ea7d049c7705dc13afc202dd18e1827f3484f8212fd3fa7b82fc4a0c363432c9",
+      "origin": "co-Link-Conversion-Assistant-0.1.5-win-x64.zip",
+      "member": "licenses/libwdi/COPYING-LGPL"
+    },
+    {
+      "path": "helper/licenses/libwdi/README.md",
+      "sha256": "ce1fba15aa27aff93ca8b3ac7b8afd10420255e73ba072d8a1b32a1744d0d313",
+      "origin": "co-Link-Conversion-Assistant-0.1.5-win-x64.zip",
+      "member": "licenses/libwdi/README.md"
+    },
+    {
+      "path": "helper/native/inspect-radio.cpp",
+      "sha256": "01026ce310e972138999e5e05f9991777663b87be063698e70568bdd487e6bba",
+      "origin": "native probe source reference"
+    },
+    {
+      "path": "helper/native/CMakeLists.txt",
+      "sha256": "51dc8fb183b90ec9a89151ee2c9864b92d158725c450e9fae6702fa0eea39bb7",
+      "origin": "native probe source reference"
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "f0b52deee8f974b2c02aab72d037388f43b9550ca9aeafff1acf15b78f4ea9c7",
+      "origin": "publication licence for original local components"
+    },
+    {
+      "path": "README.md",
+      "sha256": "644610a295cea277e3fec616f0bce9acb95ddc4cadcd65768bc5d268392ca774",
+      "origin": "publication documentation"
+    }
+  ]
+}

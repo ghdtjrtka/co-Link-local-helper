@@ -1,0 +1,13 @@
+{
+  "project": "usbip-win2",
+  "source": "https://github.com/vadimgrn/usbip-win2",
+  "release": "v.0.9.8.1",
+  "url": "https://github.com/vadimgrn/usbip-win2/releases/download/v.0.9.8.1/USBip-0.9.8.1-x64.exe",
+  "file": "USBip-0.9.8.1-x64.exe",
+  "bytes": 26083632,
+  "sha256": "38cad6d4432b52d5bb9409d9ad03b72fdffc4ada4cd3a48fbeca1a2752a8518a",
+  "license": "BSD-2-Clause; included upstream installer displays its terms",
+  "signature_observed": "Valid Authenticode; Cloudyne Systems (Scheibling Consulting AB)",
+  "verified_on": "2026-10-19",
+  "role": "Optional Windows virtual USB client for DualSense. No virtual audio cable. No dongle conversion."
+}

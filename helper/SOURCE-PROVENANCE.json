@@ -1,0 +1,11 @@
+{
+  "source": "audio-codac/tools/manage-transmitter.ps1",
+  "source_sha256": "a86e013b89cb9d07d5491b8b8134686dc475adf67f97ef7ef958fc94411aed2e",
+  "source_bytes_sha256": "87963b5795a34ae9c116773b9eb2e6f9c51e3763692df8e9cb14990181193709",
+  "transform": "remove local backend policy; require cloud-signed device-specific plan before binding; preserve backup/rollback and pinned libwdi operations",
+  "helpers_sha256": {
+    "wdi-simple.exe": "E5C3C51396E5AEACC5B63D2991623894EB5A6A8981B7AEF680E1D0D8AF8A4387",
+    "wdi-simple-libusb0.exe": "199EFD67133FBD1B58F7698498F4FB3975E4A3C5EDA820347B1C72329D260277"
+  },
+  "executed": false
+}

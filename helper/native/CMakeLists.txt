@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.20)
+project(colink_inspect_radio LANGUAGES CXX)
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+add_executable(inspect-radio inspect-radio.cpp)
+target_compile_features(inspect-radio PRIVATE cxx_std_17)
+target_link_libraries(inspect-radio PRIVATE setupapi)

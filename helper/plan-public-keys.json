@@ -1,0 +1,9 @@
+{
+  "keys": {
+    "colink-prod-20261018": {
+      "kty": "RSA",
+      "n": "4HGnglR8TIz05hMd0Y1z0Jt5YBrirbTPBpqCnQSDBR1uhqo9qDDSStoPJf9uTRu5ZOMHh3KUKDzHaVqG_8bTRaLtBFxS4txBgq0hbu29cG2al0Flj5Nw7Raf-tUx2BMC5ZSj833JU4H_L7W6ZXtHOgbzneBb1MknNHm7Q1CUiTX6KILCzXPTr70RuP9NSvkUyRX4UKkrIqLvdd_UmJkrvugGSB4kg2AICxqaRzd2bh6wX5ARaEBDYBmIJ6qejJdbt9qNgFP3IWJd62ii76pyyQ7v4D-c1ihzA5oYKHc6p55n-4CB0HTOAuEzWctfV1gphIHAtEf5UWSCfLdH_IhV4Q",
+      "e": "AQAB"
+    }
+  }
+}
