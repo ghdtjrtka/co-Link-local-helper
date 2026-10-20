@@ -424,13 +424,49 @@ def _controller_init_plan(vid: int, pid: int) -> dict[str, Any]:
     return describe_controller_init(vid, pid)
 
 
+class DongleLease:
+    """One physical USB path, shared by all co-Link editions and probes.
+
+    A named kernel handle survives for the USB transport lifetime and is
+    automatically released on process exit. No persistent lock file or driver
+    change, and no thread-affine mutex ownership across async close callbacks.
+    """
+    def __init__(self, physical_path: str):
+        self.handle = None
+        if sys.platform != 'win32':
+            return
+        from ctypes import wintypes
+        api = ctypes.WinDLL('kernel32', use_last_error=True)
+        api.CreateEventW.argtypes = [ctypes.c_void_p, wintypes.BOOL, wintypes.BOOL, wintypes.LPCWSTR]
+        api.CreateEventW.restype = wintypes.HANDLE
+        api.CloseHandle.argtypes = [wintypes.HANDLE]
+        api.CloseHandle.restype = wintypes.BOOL
+        self._api = api
+        name = 'Local\\co-Link.USB.' + hashlib.sha256(physical_path.encode('utf-8')).hexdigest()
+        ctypes.set_last_error(0)
+        handle = api.CreateEventW(None, True, False, name)
+        error = ctypes.get_last_error()
+        if not handle:
+            raise ProbeError('could not reserve the selected USB transmitter')
+        if error == 183:  # ERROR_ALREADY_EXISTS: another edition/probe holds it
+            api.CloseHandle(handle)
+            raise ProbeError('selected transmitter is already in use by another co-Link instance')
+        self.handle = handle
+
+    def close(self):
+        if self.handle is not None:
+            self._api.CloseHandle(self.handle)
+            self.handle = None
+
+
 class OwnedBumbleTransport:
     """Keep usb1's USBDevice descriptor owner alive as long as its handle."""
 
-    def __init__(self, transport, descriptor_device):
+    def __init__(self, transport, descriptor_device, lease=None):
         self._transport = transport
         self._descriptor_device = descriptor_device
         self._closed = False
+        self._lease = lease
 
     def __getattr__(self, name):
         return getattr(self._transport, name)
@@ -457,6 +493,8 @@ class OwnedBumbleTransport:
                 self._transport.context.close()
             except Exception as error:
                 errors.append(error)
+        if self._lease is not None:
+            self._lease.close()
         if errors:
             raise CloseFailure(errors)
 
@@ -483,6 +521,7 @@ def open_selected_bumble_transport(usb_api=None, run_state: ProbeRunState | None
     selected_device = None
     device_handle = None
     succeeded = False
+    lease = None
     try:
         for device in context.getDeviceIterator(skip_on_error=True):
             try:
@@ -505,6 +544,9 @@ def open_selected_bumble_transport(usb_api=None, run_state: ProbeRunState | None
         if not backend or target.backend != backend:
             raise ProbeError('USB layout requires a different explicitly selected transport backend')
         selected_path = _bus_port_moniker(selected_device)
+        # Reserve before any serial-descriptor read, handle open or HCI reset.
+        # Bus/port identity is independent of edition, backend and device name.
+        lease = DongleLease(selected_path)
         if target.serial:
             try:
                 serial = selected_device.getSerialNumber()
@@ -588,7 +630,7 @@ def open_selected_bumble_transport(usb_api=None, run_state: ProbeRunState | None
             source,
             sink,
         )
-        owned_transport = OwnedBumbleTransport(transport, selected_device)
+        owned_transport = OwnedBumbleTransport(transport, selected_device, lease)
         if run_state is not None:
             run_state.transport_opened = True
         device_handle = None  # Bumble UsbTransport owns it; descriptor owner is retained.
@@ -617,6 +659,8 @@ def open_selected_bumble_transport(usb_api=None, run_state: ProbeRunState | None
             except Exception as close_error:
                 if run_state is not None:
                     run_state.record_close_error(close_error)
+        if not succeeded and lease is not None:
+            lease.close()
 
 
 def _make_bumble_device(transport, run_state: ProbeRunState | None = None):
@@ -683,6 +727,13 @@ def _make_bumble_device(transport, run_state: ProbeRunState | None = None):
             # Count only after Bumble's USB sink accepted the HCI packet into
             # its queue. Completion is recorded by the selected USB sink below.
             self._sink.on_packet(packet)
+            # Control metadata only: never log pairing/authentication payloads.
+            # Distinguish a local Disconnect or mode command from a controller-
+            # originated timeout without capturing any audio or input reports.
+            if packet and packet[0] == hci.HCI_COMMAND_PACKET and len(packet) >= 4:
+                opcode = int.from_bytes(packet[1:3], 'little')
+                if opcode in (0x0406, 0x0803, 0x0804, 0x080B):
+                    logging.getLogger('winusb_radio').info('host link command opcode=0x%04X', opcode)
             if run_state is not None and packet and packet[0] == hci.HCI_COMMAND_PACKET:
                 run_state.command_enqueued(int.from_bytes(packet[1:3], 'little') if len(packet) >= 3 else None)
 

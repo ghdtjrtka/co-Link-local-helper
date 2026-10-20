@@ -1,4 +1,4 @@
-﻿param([string]$SourceDirectory = (Split-Path $PSCommandPath -Parent), [ValidatePattern('^[0-9]+\.[0-9]+\.[0-9]+$')][string]$Version='0.1.1')
+﻿param([string]$SourceDirectory = (Split-Path $PSCommandPath -Parent), [ValidatePattern('^[0-9]+\.[0-9]+\.[0-9]+$')][string]$Version='0.1.1', [switch]$Developer)
 $env:PSModulePath = (Join-Path $PSHOME 'Modules') + ';' + (Join-Path ([Environment]::GetFolderPath([Environment+SpecialFolder]::ProgramFiles)) 'WindowsPowerShell\Modules')
 $ErrorActionPreference = 'Stop'
 $Source = [IO.Path]::GetFullPath($SourceDirectory)
@@ -6,13 +6,19 @@ if (-not (Test-Path -LiteralPath (Join-Path $Source 'helper_server.py') -PathTyp
 $principal=New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
 if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     $args = @('-NoProfile','-File',("`"$PSCommandPath`""),'-SourceDirectory',("`"$Source`""),'-Version',$Version)
+    if ($Developer) { $args += '-Developer' }
     $elevated = Start-Process -FilePath 'powershell.exe' -ArgumentList $args -Verb RunAs -WindowStyle Hidden -Wait -PassThru
     exit $elevated.ExitCode
 }
 
 $programFiles=[Environment]::GetFolderPath([Environment+SpecialFolder]::ProgramFiles)
 $product = Join-Path $programFiles 'co-Link Conversion Assistant'
-$destination = Join-Path $product $Version
+$installFolder = if ($Developer) { $Version + '-dev' } else { $Version }
+$destination = Join-Path $product $installFolder
+if ($Developer -and (-not (Test-Path -LiteralPath (Join-Path $Source 'co-link-local-converter.dll')) -or
+                      -not (Test-Path -LiteralPath (Join-Path $Source 'local_policy.py')))) { throw 'developer_module_missing' }
+if (-not $Developer -and ((Test-Path -LiteralPath (Join-Path $Source 'co-link-local-converter.dll')) -or
+                         (Test-Path -LiteralPath (Join-Path $Source 'local_policy.py')))) { throw 'developer_package_requires_separate_installation' }
 if (Test-Path -LiteralPath $destination) { throw 'install_destination_already_exists' }
 if (Test-Path -LiteralPath $product) {
     $productItem = Get-Item -LiteralPath $product -Force
@@ -29,7 +35,7 @@ if (Test-Path -LiteralPath $product) {
 $copyRoots = @('runtime','native','licenses','radio')
 $copyFiles = @('helper_server.py','helper_runtime.py','transport_readiness.py','identity.py','inspect_adapter.py',
     'plan.py','plan-public-keys.json','trusted_installation.py','requirements.txt',
-    'SOURCE-PROVENANCE.json','CONTENTS.sha256','Run Assistant.cmd','Start Assistant.cmd','Install Assistant.cmd','README.txt')
+    'SOURCE-PROVENANCE.json','RUNTIME-INVENTORY.json','CONTENTS.sha256','Run Assistant.cmd','Start Assistant.cmd','Install Assistant.cmd','README.txt')
 if(Test-Path -LiteralPath (Join-Path $Source 'co-link-local-converter.dll')){
     if(!(Test-Path -LiteralPath (Join-Path $Source 'local_policy.py'))){throw 'local_module_incomplete'}
     $copyFiles+=@('co-link-local-converter.dll','local_policy.py')
@@ -114,7 +120,7 @@ try {
     Write-Output (Join-Path $destination 'Start Assistant.cmd')
 } catch {
     # Destination was created by this run and never existed before it.
-    $failed=Join-Path $product ($Version+'.failed-'+[Guid]::NewGuid().ToString('N'))
+    $failed=Join-Path $product ($installFolder+'.failed-'+[Guid]::NewGuid().ToString('N'))
     if([IO.Path]::GetFullPath($destination).StartsWith([IO.Path]::GetFullPath($product)+'\',[StringComparison]::OrdinalIgnoreCase)){
         Move-Item -LiteralPath $destination -Destination $failed -ErrorAction SilentlyContinue
     }

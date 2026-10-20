@@ -64,7 +64,7 @@ class WindowsHelperRuntime:
         candidates=[self.native/"inspect-radio.exe",self.native/"Release"/"inspect-radio.exe",
                     self.native/"build"/"Release"/"inspect-radio.exe"]
         if not any(p.is_file() for p in candidates): issues.append("native_radio_inspector_missing")
-        return {"status":"ready" if not issues else "unavailable","errors":issues,"plan_schemas":["co-link.conversion-plan/3","co-link.recovery-plan/1"]}
+        return {"status":"ready" if not issues else "unavailable","errors":issues,"plan_schemas":["co-link.conversion-plan/3","co-link.recovery-plan/1"],"conversion_scopes":["dongle-lifetime","steam-software"]}
 
     def list_devices(self):
         manager = self.native / "manage-transmitter.ps1"
@@ -214,6 +214,7 @@ class WindowsHelperRuntime:
         result={'schema':'co-link.conversion-result/1','job_id':plan['job_id'],
             'instance_id':plan['instance_id'],'dongle_fingerprint':plan['dongle_fingerprint'],
             'execution_fingerprint':plan['fingerprint'],'success':False,'usable':False,
+            'device_untouched':(native or {}).get('device_untouched') is True,
             'reboot_required':bool((native or {}).get('reboot_required')), 'service':'','problem':-1}
         try:
             current=self._current_device(plan['instance_id'])
@@ -257,6 +258,8 @@ class WindowsHelperRuntime:
         result['success']=(native.get('success') is True and not result['reboot_required'] and result['problem']==0 and
             result['service'].casefold()==plan['original_service'].casefold() and
             result['driver_inf'].casefold()==plan['original_inf'].casefold())
+        if native.get('error') == 'restore_unavailable' and not result['success']:
+            result['error'] = 'restore_unavailable'
         return result
 
     @staticmethod

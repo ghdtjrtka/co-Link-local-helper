@@ -7,5 +7,19 @@
     "wdi-simple.exe": "E5C3C51396E5AEACC5B63D2991623894EB5A6A8981B7AEF680E1D0D8AF8A4387",
     "wdi-simple-libusb0.exe": "199EFD67133FBD1B58F7698498F4FB3975E4A3C5EDA820347B1C72329D260277"
   },
-  "executed": false
+  "native_inspector": {
+    "helper_version": "0.1.8",
+    "sha256": "047e93b9aa7db983c848ffd30405cb25a6568bc07fcb4f28ca687ebbff7c0ba0",
+    "sources_sha256": {
+      "native/inspect-radio.cpp": "90ed7679cb8b7233289d389ca8ff9f706b50310a8830fcb0a69dcf45dd63946e",
+      "native/CMakeLists.txt": "4d77f7dd4384d42d7954b6c2372dc03eb7e5eef3e87aedb3c9ef4a0c0dfc082e",
+      "native/inspect-radio.rc.in": "abbf61e21dc53420b70347308fbd6425ba874754a53783f021edee3c8a1b80fb"
+    },
+    "scope": "Reviewed local build output and source references; not a reproducible-build or harmlessness certification"
+  },
+  "local_source": {
+    "path": "executor/native/manage-transmitter.ps1",
+    "sha256": "44b51923920a9ef426c08d21cb9e721e0e42ea5874d7c3d021c2fd660931729b"
+  },
+  "scope": "Build provenance only; historical input hashes do not identify the current transformed script."
 }

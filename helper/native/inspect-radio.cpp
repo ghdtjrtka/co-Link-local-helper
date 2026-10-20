@@ -22,7 +22,10 @@ int wmain(int argc, wchar_t** argv) {
     for (DWORD i=0;;++i) {
         SP_DEVICE_INTERFACE_DATA iface{}; iface.cbSize=sizeof(iface);
         if (!SetupDiEnumDeviceInterfaces(set,nullptr,&GUID_BTHPORT_DEVICE_INTERFACE,i,&iface)) break;
-        DWORD need=0; SetupDiGetDeviceInterfaceDetail(set,&iface,nullptr,0,&need,nullptr);
+        DWORD need=0;
+        if (SetupDiGetDeviceInterfaceDetail(set,&iface,nullptr,0,&need,nullptr) ||
+            GetLastError()!=ERROR_INSUFFICIENT_BUFFER || need<sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA) ||
+            need>1024*1024) continue;
         std::vector<BYTE> mem(need); auto detail=reinterpret_cast<SP_DEVICE_INTERFACE_DETAIL_DATA*>(mem.data());
         detail->cbSize=sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA);
         SP_DEVINFO_DATA dev{}; dev.cbSize=sizeof(dev);

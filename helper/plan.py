@@ -86,7 +86,7 @@ def verify(envelope, keys, report, now=None):
         raise ValueError('plan_expired_or_invalid_time')
     if not re.fullmatch(r'[A-Za-z0-9_-]{16,100}', plan['job_id']):
         raise ValueError('invalid_job_id')
-    if (plan['scope']!='dongle-lifetime' or not re.fullmatch(r'[a-f0-9]{32}',str(plan['entitlement_id'])) or
+    if (plan['scope'] not in ('dongle-lifetime','steam-software') or not re.fullmatch(r'[a-f0-9]{32}',str(plan['entitlement_id'])) or
             plan['dongle_fingerprint']!=dongle_fingerprint(report)):
         raise ValueError('plan_entitlement_mismatch')
     if (report.get('schema') != 'co-link.adapter-report/1' or report.get('matches') != 1 or

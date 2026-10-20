@@ -1,4 +1,4 @@
-﻿# co-Link separate local executor. Cloud selects the backend; signed plan required for Convert.
+# co-Link separate local executor. Cloud selects the backend; signed plan required for Convert.
 # Audio co-DAC transmitter driver helper.
 # UTF-8 with BOM is required because PowerShell 5.1 reads this file as the ANSI code page
 # otherwise; Korean Windows would then corrupt the Korean error text below.
@@ -314,6 +314,20 @@ function New-OriginalBackup {
 
 function Invoke-Binding {
     param([string]$HardwareId, [string]$InfPath)
+    # A device node keeps the driver it already started with, so binding a different INF while the
+    # node is present can leave it in CM_PROB_FAILED_ADD (problem 31). Removing the node first makes
+    # Windows re-evaluate the chosen INF on rescan.
+    $instances = @(Get-PnpDevice -PresentOnly -ErrorAction SilentlyContinue |
+        Where-Object { $_.InstanceId -like ($HardwareId + '*') -or ($_.HardwareID -contains $HardwareId) } |
+        Select-Object -ExpandProperty InstanceId)
+    foreach ($instance in $instances) {
+        & pnputil.exe /remove-device $instance | Out-Null
+    }
+    if ($instances.Count -gt 0) {
+        Start-Sleep -Seconds 3
+        & pnputil.exe /scan-devices | Out-Null
+        Start-Sleep -Seconds 2
+    }
     if (-not ('AudioCodacTransmitterDriverBinding' -as [type])) {
         Add-Type @'
 using System;
@@ -393,6 +407,37 @@ function Get-UsbBluetoothRadios {
             status = [string]$device.Status
             problem = ConvertTo-ProblemCode $device.ConfigManagerErrorCode
         }
+    }
+    # A converted transmitter is no longer a Bluetooth-class device, so it drops out of the scan
+    # above. Re-add it from the app's own record so an already-converted dongle can be inspected and
+    # converted again instead of disappearing from the picker.
+    $record = Join-Path $env:LOCALAPPDATA 'AudioCoDAC\winusb\transmitter.json'
+    if (Test-Path -LiteralPath $record) {
+        try {
+            $saved = Get-Content -LiteralPath $record -Raw | ConvertFrom-Json
+            $savedId = [string]$saved.instance_id
+            if ($savedId -and -not ($items | Where-Object { $_.instance_id -ieq $savedId })) {
+                $identity = Get-UsbIdentity $savedId
+                $device = Get-CimInstance Win32_PnPEntity -Filter ('DeviceID=''' + $savedId.Replace("'", "''") + '''') -ErrorAction SilentlyContinue
+                if ($identity -and $device) {
+                    $service = [string]$device.Service
+                    $items += [ordered]@{
+                        instance_id = $savedId
+                        name = $(if ($device.Name) { [string]$device.Name } else { $savedId })
+                        service = $service
+                        driver_inf = [string](Get-DeviceProperty $savedId 'DEVPKEY_Device_DriverInfPath')
+                        backend = $(if ($service -ieq 'WinUSB') { 'winusb' } elseif ($service -ieq 'libusb0') { 'libusb0' } else { '' })
+                        vid = $identity.Vid
+                        pid = $identity.Pid
+                        serial = $identity.Serial
+                        interface = $identity.Interface
+                        restore_available = (Test-BackupAvailable $savedId $identity)
+                        status = [string]$device.Status
+                        problem = ConvertTo-ProblemCode $device.ConfigManagerErrorCode
+                    }
+                }
+            }
+        } catch { }
     }
     return $items
 }
@@ -537,6 +582,7 @@ $result = [ordered]@{
     instance_id = $InstanceId
     success = $false
     usable = $false
+    device_untouched = $true
     reboot_required = $false
     service = $null
     expected_service = $null
@@ -556,10 +602,23 @@ try {
     if (-not $InstanceId) { throw 'target_missing' }
     $identity = Get-UsbIdentity $InstanceId
     if (-not $identity) { throw 'not_hci' }
-    if (-not (Test-HciIdentity $InstanceId)) { throw 'not_hci' }
+    $state = Get-DeviceState $InstanceId
+    # Convert creates a WinUSB binding that never presents as HCI again, and Restore is the only way
+    # back, so neither may require HCI. Convert without HCI is allowed only for a transmitter we
+    # already hold a backup for; Backup and Check still need a real HCI device.
+    $boundToOurBackend = $state.Service -in @('WinUSB', 'libusb0')
+    $hasBackup = Test-BackupAvailable $InstanceId $identity
+    # HCI is only required when we have no other way to identify the transmitter: a converted
+    # dongle is identified over WinUSB by identity.py, and its original INF is already recorded.
+    $requiresHci = $false
+    if ($Mode -eq 'Backup' -and -not $hasBackup) { $requiresHci = $true }
+    if ($Mode -eq 'Check' -and -not $boundToOurBackend) { $requiresHci = $true }
+    if ($Mode -eq 'Convert' -and -not $boundToOurBackend -and -not $hasBackup) {
+        $requiresHci = $true
+    }
+    if ($requiresHci -and -not (Test-HciIdentity $InstanceId)) { throw 'not_hci' }
     Assert-UniqueVidPid $InstanceId $identity
     Assert-NotCompositeParent $InstanceId
-    $state = Get-DeviceState $InstanceId
 
     if ($Mode -eq 'Backup') {
         $backup = New-OriginalBackup $InstanceId $identity
@@ -688,6 +747,7 @@ try {
 
         $mutated = $false
         try {
+            $result.device_untouched = $false
             $mutated = $true
             $reboot = Invoke-Binding $identity.HardwareId $infPath
             Start-Sleep -Seconds 2
@@ -749,6 +809,7 @@ try {
         $null = Get-DeviceState $InstanceId
         Assert-UniqueVidPid $InstanceId $identity
         Assert-NotCompositeParent $InstanceId
+        $result.device_untouched = $false
         $reboot = Invoke-Binding ([string]$backup.Metadata.hardware_id) $backup.InfPath
         Start-Sleep -Seconds 2
         $after = Get-DeviceState $InstanceId
@@ -765,7 +826,10 @@ try {
             $result.error = 'reboot_pending'
             $result.message = 'The driver change is pending a restart and is not usable yet.'
         } elseif (-not $usable) {
-            throw ('restore_failed:service=' + $after.Service + ';problem=' + $after.Problem)
+            # This transmitter cannot start the Windows Bluetooth stack at all, so "restored" here
+            # means the original binding is unavailable, not that the device is broken for good.
+            # Convert can always rebind it to our WinUSB backend again.
+            throw ('restore_unavailable:service=' + $after.Service + ';problem=' + $after.Problem)
         } else {
             $result.success = $true
         }

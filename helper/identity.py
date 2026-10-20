@@ -64,6 +64,14 @@ def inspect_identity(instance_id: str, vid: int, pid: int, *, state_root=None,
                 return make_identity(vid, pid, controller)
             if (type(pid_value) is not int or type(updated_ms) is not int or
                     updated_ms > current or current - updated_ms > max_age_ms):
+                # A stale status means the recorded pid is not evidence that the app still owns the
+                # radio (the pid may even be reused). Read the selected controller over WinUSB
+                # instead of failing the whole inspection.
+                backend = transmitter.get('backend')
+                if backend in ('winusb', 'libusb0'):
+                    reader = detached_reader or _detached_controller_address
+                    controller = reader(instance_id, vid, pid, backend)
+                    return make_identity(vid, pid, controller)
                 raise ValueError("converted_radio_status_stale")
             controller = status.get("controller")
             if not isinstance(controller, str):

@@ -36,6 +36,6 @@ its signed upstream installer. Standard, Developer and Steam use distinct
 installation/settings identities; Standard contains no offline converter.
 
 Corresponding LGPL library sources and rebuild instructions are available free:
-https://colink.namanavi.com/downloads/co-Link-LGPL-Sources-0.1.2.zip
+https://colink.namanavi.com/downloads/co-Link-LGPL-Sources-0.1.10.zip
 
-Support: ghdtjrtka@gmail.com
+Support: cosmos0111@gmail.com

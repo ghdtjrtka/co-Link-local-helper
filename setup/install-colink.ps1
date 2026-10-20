@@ -194,6 +194,8 @@ try {
     try { $identity = $reader.ReadToEnd() | ConvertFrom-Json } finally { $reader.Dispose() }
     if ($identity.schema -ne 1 -or -not $ProductNames.ContainsKey([string]$identity.edition)) { throw 'Invalid product edition.' }
     $edition = [string]$identity.edition
+    $productVersion = if ($identity.PSObject.Properties.Name -contains 'version') { [string]$identity.version } else { '' }
+    if ($productVersion -and $productVersion -notmatch '^\d+\.\d+\.\d+(?:\.\d+)?$') { throw 'Invalid product version.' }
     $productName = $ProductNames[$edition]
     if ($edition -eq 'Standard') {
         foreach ($name in $expectedFiles.Keys) {
@@ -279,10 +281,12 @@ if (-not (Test-Path -LiteralPath $uninstaller -PathType Leaf)) { throw 'Setup is
 Copy-Item -LiteralPath $uninstaller -Destination (Join-Path $installRoot 'uninstall-colink.ps1') -Force
 $registration = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\co-Link.' + $edition
 New-Item -Path $registration -Force | Out-Null
-$receipt = [ordered]@{schema=1;edition=$edition;display_name=$productName;install_root=$installRoot;shortcut=$shortcutPath;package_sha256=(Get-FileHash -LiteralPath $package -Algorithm SHA256).Hash.ToLowerInvariant();content_version=$version;driver_requested=$installUsbip}
+$receipt = [ordered]@{schema=1;edition=$edition;display_name=$productName;install_root=$installRoot;shortcut=$shortcutPath;package_sha256=(Get-FileHash -LiteralPath $package -Algorithm SHA256).Hash.ToLowerInvariant();content_version=$version;product_version=$productVersion;driver_requested=$installUsbip}
 [IO.File]::WriteAllText((Join-Path $installRoot 'installation.json'),($receipt | ConvertTo-Json),[Text.UTF8Encoding]::new($false))
 New-ItemProperty -Path $registration -Name DisplayName -Value $productName -PropertyType String -Force | Out-Null
-New-ItemProperty -Path $registration -Name DisplayVersion -Value $version.Substring(0,12) -PropertyType String -Force | Out-Null
+$displayVersion = if ($productVersion) { $productVersion } else { (Get-Item -LiteralPath (Join-Path $installRoot 'co-Link.exe')).VersionInfo.ProductVersion }
+if (-not $displayVersion) { $displayVersion = 'Unversioned legacy build' }
+New-ItemProperty -Path $registration -Name DisplayVersion -Value $displayVersion -PropertyType String -Force | Out-Null
 New-ItemProperty -Path $registration -Name InstallLocation -Value $installRoot -PropertyType String -Force | Out-Null
 New-ItemProperty -Path $registration -Name DisplayIcon -Value (Join-Path $installRoot 'co-Link.exe') -PropertyType String -Force | Out-Null
 New-ItemProperty -Path $registration -Name UninstallString -Value ('powershell.exe -NoProfile -ExecutionPolicy Bypass -File "' + (Join-Path $installRoot 'uninstall-colink.ps1') + '" -Execute') -PropertyType String -Force | Out-Null

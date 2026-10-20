@@ -6,9 +6,9 @@ are separate; their source is not included in this repository.
 
 ## Which code is being published?
 
-- `setup/`: Standard 0.1.2 app installation, removal, optional signed USB/IP
+- `setup/`: Standard 0.1.10 app installation, removal, optional signed USB/IP
   installer verification and launcher scripts.
-- `helper/`: Conversion Assistant 0.1.5 loopback server, inspection, stable-device
+- `helper/`: Conversion Assistant 0.1.8 loopback server, inspection, stable-device
   identity, signed-plan verifier, local driver backup/binding/restore operations,
   protected installation and administrator elevation scripts.
 - `helper/radio/`: the actual packaged HCI initialization/probe Python source.
